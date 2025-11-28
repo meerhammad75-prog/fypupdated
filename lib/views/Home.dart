@@ -2,6 +2,9 @@ import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:news_app/views/alerts_notifications_screen.dart';
+import 'package:news_app/views/profile_screen.dart';
+import 'package:news_app/views/settings_screen.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -83,14 +86,33 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
+          leadingWidth: 70,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 12),
+            child: GestureDetector(
+              onTap: () => Navigator.pushNamed(context, ProfileScreen.routeName),
+              child: const CircleAvatar(
+                backgroundImage: AssetImage('assets/images/logo.png'),
+              ),
+            ),
+          ),
           title: Text(
             'Energy Dashboard',
             style: GoogleFonts.poppins(
-                fontSize: 20, fontWeight: FontWeight.w600, color: Colors.black),
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
           ),
           actions: [
-            IconButton(onPressed: () {}, icon: const Icon(Icons.notifications_none, color: Colors.black)),
-            IconButton(onPressed: () {}, icon: const Icon(Icons.settings_outlined, color: Colors.black)),
+            IconButton(
+              onPressed: () => Navigator.pushNamed(context, AlertsNotificationsScreen.routeName),
+              icon: const Icon(Icons.notifications_none, color: Colors.black),
+            ),
+            IconButton(
+              onPressed: () => Navigator.pushNamed(context, SettingsScreen.routeName),
+              icon: const Icon(Icons.settings_outlined, color: Colors.black),
+            ),
           ],
         ),
         body: SingleChildScrollView(
