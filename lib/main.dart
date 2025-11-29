@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:news_app/services/auth_wrapper.dart';
 import 'package:news_app/theme/energy_theme.dart';
 import 'package:news_app/theme/theme_manager.dart';
 import 'package:news_app/views/Home.dart';

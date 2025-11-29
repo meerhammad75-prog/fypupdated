@@ -2,13 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:news_app/views/login.dart';
-
-// Ensure these imports match your actual file names
+// Removed AuthServices import as it is no longer needed here
 import 'about_screen.dart';
 import 'change_password.dart';
 import 'edit_profile.dart';
-import 'notifications_screen.dart';
-// Removed support_screens.dart import
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -64,14 +61,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Future<void> _handleLogout() async {
-    await FirebaseAuth.instance.signOut();
-    if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-          (Route<dynamic> route) => false,
-    );
-  }
+  // Removed _handleLogout and _showLogoutConfirmation from here
 
   @override
   Widget build(BuildContext context) {
@@ -100,14 +90,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () => Navigator.pop(context),
             ),
           ),
-          title: const Text("Profile", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          title: const Text("Profile",
+              style:
+              TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           centerTitle: true,
         ),
         body: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: Colors.white))
+            ? const Center(
+            child: CircularProgressIndicator(color: Colors.white))
             : SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+          padding:
+          const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
           child: Column(
             children: [
               // --- AVATAR SECTION ---
@@ -118,7 +112,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   shape: BoxShape.circle,
                   color: Colors.white,
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))
+                    BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5))
                   ],
                 ),
                 child: CircleAvatar(
@@ -126,7 +123,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   backgroundColor: _cyanColor.withOpacity(0.1),
                   child: Text(
                     name.isNotEmpty ? name[0].toUpperCase() : "U",
-                    style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: _cyanColor),
+                    style: TextStyle(
+                        fontSize: 40,
+                        fontWeight: FontWeight.bold,
+                        color: _cyanColor),
                   ),
                 ),
               ),
@@ -134,11 +134,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Text(
                 name,
                 style: const TextStyle(
-                    color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5),
               ),
               Text(
                 email,
-                style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 14),
+                style: TextStyle(
+                    color: Colors.white.withOpacity(0.9), fontSize: 14),
               ),
 
               const SizedBox(height: 35),
@@ -148,7 +152,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildCard([
                 _buildInfoRow(Icons.phone_iphone_rounded, "Phone", phone),
                 _buildDivider(),
-                _buildInfoRow(Icons.location_on_rounded, "Address", address),
+                _buildInfoRow(
+                    Icons.location_on_rounded, "Address", address),
               ]),
 
               const SizedBox(height: 25),
@@ -157,25 +162,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _buildSectionHeader("Settings"),
               _buildCard([
                 // 1. Edit Profile
-                _buildMenuRow(Icons.edit_rounded, "Edit Profile", () async {
-                  bool? updated = await Navigator.push(context, MaterialPageRoute(
-                      builder: (_) => EditProfileScreen(currentData: {'name': name, 'phone': phone, 'address': address})
-                  ));
-                  if (updated == true) _getUserData();
-                }),
+                _buildMenuRow(Icons.edit_rounded, "Edit Profile",
+                        () async {
+                      bool? updated = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => EditProfileScreen(currentData: {
+                                'name': name,
+                                'phone': phone,
+                                'address': address
+                              })));
+                      if (updated == true) _getUserData();
+                    }),
 
                 _buildDivider(),
 
-                // 2. Notifications
-                _buildMenuRow(Icons.notifications_active_rounded, "Notifications", () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
-                }),
-
-                _buildDivider(),
-
-                // 3. Change Password
+                // 2. Change Password
                 _buildMenuRow(Icons.lock_rounded, "Change Password", () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const ChangePasswordScreen()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const ChangePasswordScreen()));
                 }),
               ]),
 
@@ -184,45 +191,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // --- SUPPORT SECTION ---
               _buildSectionHeader("Support"),
               _buildCard([
-                // "Help & Support" removed here
-
-                // 5. About (Now the only item)
-                _buildMenuRow(Icons.info_outline_rounded, "About Voltify", () {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
+                _buildMenuRow(
+                    Icons.info_outline_rounded, "About Voltify", () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const AboutScreen()));
                 }),
               ]),
 
               const SizedBox(height: 40),
 
-              // --- LOGOUT BUTTON ---
-              SizedBox(
-                width: double.infinity,
-                height: 55,
-                child: ElevatedButton(
-                  onPressed: _handleLogout,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    elevation: 5,
-                    shadowColor: _cyanColor.withOpacity(0.4),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.logout_rounded),
-                      SizedBox(width: 10),
-                      Text(
-                        'Log Out',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
+              // LOGOUT BUTTON REMOVED FROM HERE
             ],
           ),
         ),
@@ -244,8 +222,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               fontSize: 12,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.2,
-              shadows: [Shadow(color: Colors.black45, offset: Offset(0, 1), blurRadius: 3)]
-          ),
+              shadows: [
+                Shadow(
+                    color: Colors.black45, offset: Offset(0, 1), blurRadius: 3)
+              ]),
         ),
       ),
     );
@@ -279,9 +259,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.w500)),
+                Text(label,
+                    style: const TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w500)),
                 const SizedBox(height: 4),
-                Text(value, style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w600)),
+                Text(value,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w600)),
               ],
             ),
           ),
@@ -302,12 +290,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               _buildIconBox(icon),
               const SizedBox(width: 16),
-              Text(
-                  title,
-                  style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w600)
-              ),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                      fontWeight: FontWeight.w600)),
               const Spacer(),
-              const Icon(Icons.chevron_right_rounded, color: Colors.grey, size: 22),
+              const Icon(Icons.chevron_right_rounded,
+                  color: Colors.grey, size: 22),
             ],
           ),
         ),
@@ -330,7 +320,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildDivider() {
     return Padding(
       padding: const EdgeInsets.only(left: 72),
-      child: Divider(height: 1, thickness: 1, color: Colors.grey.withOpacity(0.1)),
+      child: Divider(
+          height: 1, thickness: 1, color: Colors.grey.withOpacity(0.1)),
     );
   }
 }

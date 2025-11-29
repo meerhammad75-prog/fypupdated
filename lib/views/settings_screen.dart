@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart'; // Add this to pubspec.yaml for phone/email launching
+import 'package:url_launcher/url_launcher.dart';
 
-// IMPORT YOUR SCREENS HERE
+// ADDED AUTH SERVICES IMPORT
+import 'package:news_app/services/auth.dart';
+
 import 'support_screens.dart';
 import 'about_screen.dart';
+import 'notifications_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -83,6 +86,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
+  // 4. Logout Confirmation Dialog (Added Here)
+  void _showLogoutConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("Log Out", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text("Are you sure you want to log out of your account?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel", style: TextStyle(color: Colors.grey)),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context); // Close the dialog
+              AuthServices().signOut(context); // Perform the actual logout
+            },
+            child: Text("Log Out", style: TextStyle(color: _cyanColor, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -136,6 +164,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   subtitle: _selectedTimezone,
                   onTap: _showTimezonePicker,
                 ),
+                _buildDivider(),
+                _buildNavTile(
+                  icon: Icons.notifications_active_rounded,
+                  gradient: const [Color(0xFFFF8008), Color(0xFFFFC837)],
+                  title: "Notifications",
+                  subtitle: "Manage alerts",
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const NotificationsScreen()));
+                  },
+                ),
               ]),
 
               const SizedBox(height: 30),
@@ -157,7 +195,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               // --- SECTION 3: SUPPORT ---
               _buildHeader("Support"),
               _buildPremiumCard([
-                // Opens Contact Sheet
                 _buildNavTile(
                   icon: Icons.support_agent_rounded,
                   gradient: const [Color(0xFF11998e), Color(0xFF38ef7d)],
@@ -166,7 +203,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onTap: () => _showContactSheet(context),
                 ),
                 _buildDivider(),
-                // Navigates to FAQ Screen
                 _buildNavTile(
                   icon: Icons.live_help_rounded,
                   gradient: const [Color(0xFF8E2DE2), Color(0xFF4A00E0)],
@@ -177,6 +213,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ]),
 
               const SizedBox(height: 40),
+
+              // --- LOGOUT BUTTON (ADDED HERE) ---
+              SizedBox(
+                width: double.infinity,
+                height: 55,
+                child: ElevatedButton(
+                  onPressed: _showLogoutConfirmation,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    elevation: 5,
+                    shadowColor: _cyanColor.withOpacity(0.4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.logout_rounded),
+                      SizedBox(width: 10),
+                      Text(
+                        'Log Out',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -336,14 +403,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // ===========================================================================
 
   // 1. Timezone Picker
-// 1. Timezone Picker
   void _showTimezonePicker() {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      isScrollControlled: true, // 1. Allows sheet to adjust better to content
+      isScrollControlled: true,
       builder: (context) => Container(
-        // 2. Limit height to 80% of screen to prevent full-screen lockout
         constraints: BoxConstraints(
             maxHeight: MediaQuery.of(context).size.height * 0.8
         ),
@@ -351,7 +416,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(30))
         ),
-        // 3. Wrap in SingleChildScrollView to handle overflow
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -374,7 +438,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
               ListView.separated(
                 shrinkWrap: true,
-                // Keep NeverScrollable so the outer SingleChildScrollView handles the scrolling
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _timezones.length,
                 separatorBuilder: (_, __) => const Divider(height: 1),

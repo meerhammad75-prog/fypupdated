@@ -50,6 +50,7 @@ dependencies:
   video_player_android: ^2.8.15
   shared_preferences: ^2.2.1
   url_launcher: ^6.3.0  # <--- ADD THIS LINE
+  fl_chart: ^0.65.0
 
 dev_dependencies:
   flutter_test:

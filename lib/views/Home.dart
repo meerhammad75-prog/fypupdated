@@ -9,6 +9,7 @@ import 'package:news_app/views/alerts_notifications_screen.dart';
 import 'package:news_app/views/profile_screen.dart';
 import 'package:news_app/views/settings_screen.dart';
 
+import 'analytics.dart';
 import 'devices.dart';
 // IMPORT YOUR DEVICES SCREEN FILE HERE.
 // Example: import 'path/to/devices_screen.dart';
@@ -86,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     final List<Widget> _pages = [
       _buildDashboardView(),          // Index 0: Your original Home Dashboard
       const DevicesScreen(),          // Index 1: The Device Manager (Make sure class name matches)
-      const Center(child: Text("Usage Screen")), // Index 2: Placeholder
+      const EnergyStatisticsScreen(), // Index 2: Placeholder
       const Center(child: Text("Bill Screen")),  // Index 3: Placeholder
       const SettingsScreen() // Index 4: Placeholder
     ];

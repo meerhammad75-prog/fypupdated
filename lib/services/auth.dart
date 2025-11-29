@@ -1,5 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+
+import '../views/avain he.dart';
+import 'auth_wrapper.dart';
 
 class AuthServices {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -108,10 +112,15 @@ class AuthServices {
   }
 
   ///sign out
-  Future<void> signOut() async {
+  Future<void> signOut(BuildContext context) async {
     try {
-      await _auth.signOut();
+      await FirebaseAuth.instance.signOut();
       print('User signed out successfully');
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const AuthWrapper()),
+            (route) => false, // removes all previous routes
+      );
     } catch (e) {
       print('Sign out error: $e');
       throw Exception('Failed to sign out: $e');
