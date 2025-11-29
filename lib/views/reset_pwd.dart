@@ -101,8 +101,10 @@ class _ResetPasswordViewState extends State<ResetPasswordView> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
+                    style: const TextStyle(color: Colors.black),
                     decoration: InputDecoration(
                       hintText: 'Enter your email',
+                      hintStyle: const TextStyle(color: Colors.grey),
                       prefixIcon:
                       const Icon(Icons.email_outlined, color: Colors.grey),
                       filled: true,

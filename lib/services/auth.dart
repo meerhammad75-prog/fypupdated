@@ -20,7 +20,15 @@ class AuthServices {
         password: password,
       );
 
-      await userCredential.user!.sendEmailVerification();
+      // Send email verification with better error handling
+      try {
+        await userCredential.user!.sendEmailVerification();
+        print("Email verification sent successfully to: $email");
+      } catch (emailError) {
+        print("Error sending email verification: $emailError");
+        // Don't fail registration if email sending fails, but log it
+        // The user can request a new verification email later
+      }
 
       await _firestore.collection('users')
           .doc(userCredential.user!.uid)
@@ -35,9 +43,12 @@ class AuthServices {
       });
 
       return userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      print("Firebase Auth Registration Error: ${e.code} - ${e.message}");
+      rethrow; // Re-throw to let the UI handle it properly
     } catch (e) {
       print("Registration Error: $e");
-      return null;
+      rethrow; // Re-throw to let the UI handle it properly
     }
   }
 
@@ -53,17 +64,28 @@ class AuthServices {
       );
 
       if (userCredential.user != null && !userCredential.user!.emailVerified) {
+        // Send a new verification email before signing out
+        try {
+          await userCredential.user!.sendEmailVerification();
+          print("New verification email sent to: $email");
+        } catch (emailError) {
+          print("Error sending verification email: $emailError");
+        }
+        
         await _auth.signOut();
         throw FirebaseAuthException(
           code: 'email-not-verified',
-          message: 'Please verify your email before logging in.',
+          message: 'Please verify your email before logging in. A new verification email has been sent.',
         );
       }
 
       return userCredential.user;
+    } on FirebaseAuthException catch (e) {
+      print("Firebase Auth Login Error: ${e.code} - ${e.message}");
+      rethrow; // Re-throw to let the UI handle it properly
     } catch (e) {
       print("Login Error: $e");
-      return null;
+      rethrow; // Re-throw to let the UI handle it properly
     }
   }
 
@@ -73,7 +95,16 @@ class AuthServices {
 
   ///reset password
   Future resetPassword(String email) async {
-    return _auth.sendPasswordResetEmail(email: email);
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+      print("Password reset email sent successfully to: $email");
+    } on FirebaseAuthException catch (e) {
+      print("Firebase Auth Password Reset Error: ${e.code} - ${e.message}");
+      rethrow; // Re-throw to let the UI handle it properly
+    } catch (e) {
+      print("Password reset error: $e");
+      rethrow; // Re-throw to let the UI handle it properly
+    }
   }
 
   ///sign out

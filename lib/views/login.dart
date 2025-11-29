@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:news_app/services/auth.dart';
 import 'package:news_app/views/Home.dart';
@@ -80,8 +81,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextFormField(
                       controller: emailController,
                       validator: _validateEmail,
+                      style: const TextStyle(color: Colors.black),
                       decoration: const InputDecoration(
                         hintText: 'Enter your email',
+                        hintStyle: TextStyle(color: Colors.grey),
                         prefixIcon: Icon(Icons.email_outlined, color: Colors.grey),
                         filled: true,
                         fillColor: Colors.white,
@@ -96,8 +99,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: pwdController,
                       obscureText: _obscurePassword,
                       validator: _validatePassword,
+                      style: const TextStyle(color: Colors.black),
                       decoration: InputDecoration(
                         hintText: 'Enter your password',
+                        hintStyle: const TextStyle(color: Colors.grey),
                         prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -134,39 +139,55 @@ class _LoginScreenState extends State<LoginScreen> {
                           try {
                             setState(() => _isLoading = true);
 
-                            await AuthServices()
+                            final user = await AuthServices()
                                 .loginUser(
                                 email: emailController.text.trim(),
-                                password: pwdController.text.trim())
-                                .then((val) {
-                              setState(() => _isLoading = false);
+                                password: pwdController.text.trim());
+                            
+                            setState(() => _isLoading = false);
 
-                              if (val != null) {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) => HomeScreen()));
-                              } else {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) => const AlertDialog(
-                                      backgroundColor: Colors.cyan,
-                                      title: Text(
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                          ),
-                                          "Login Error"),
-                                      content: Text(
-                                          style: TextStyle(
-                                              color: Colors.black),
-                                          "Make sure you are using the correct credentials and your email is verified."),
-                                    ));
-                              }
-                            });
+                            if (user != null) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => HomeScreen()));
+                            }
+                          } on FirebaseAuthException catch (e) {
+                            setState(() => _isLoading = false);
+                            String errorMessage = 'Login failed';
+                            if (e.code == 'email-not-verified') {
+                              errorMessage = e.message ?? 'Please verify your email before logging in. A new verification email has been sent.';
+                            } else if (e.code == 'user-not-found' || e.code == 'wrong-password' || e.code == 'invalid-credential') {
+                              errorMessage = 'Invalid email or password. Please check your credentials.';
+                            } else if (e.code == 'user-disabled') {
+                              errorMessage = 'This account has been disabled. Please contact support.';
+                            } else {
+                              errorMessage = e.message ?? 'Login failed: ${e.code}';
+                            }
+                            showDialog(
+                                context: context,
+                                builder: (context) => AlertDialog(
+                                  backgroundColor: Colors.cyan,
+                                  title: const Text(
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                      ),
+                                      "Login Error"),
+                                  content: Text(
+                                      style: const TextStyle(
+                                          color: Colors.black),
+                                      errorMessage),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                ));
                           } catch (e) {
                             setState(() => _isLoading = false);
                             ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString())));
+                                SnackBar(content: Text('Login failed: ${e.toString()}')));
                           }
                         },
                         style: ElevatedButton.styleFrom(

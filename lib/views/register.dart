@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:news_app/services/auth.dart';
 import 'package:news_app/views/login.dart';
@@ -46,7 +47,7 @@ class _SignupScreenState extends State<SignupScreen> {
               style: TextStyle(color: Colors.black),
             ),
             content: const Text(
-              'A verification email has been sent. Please verify before logging in.',
+              'A verification email has been sent to your email address. Please check your inbox (and spam folder) and verify your email before logging in.',
               style: TextStyle(color: Colors.black),
             ),
             actions: [
@@ -62,6 +63,20 @@ class _SignupScreenState extends State<SignupScreen> {
           MaterialPageRoute(builder: (_) => const LoginScreen()),
         );
       }
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = 'Registration failed';
+      if (e.code == 'email-already-in-use') {
+        errorMessage = 'This email is already registered. Please use a different email or try logging in.';
+      } else if (e.code == 'weak-password') {
+        errorMessage = 'The password is too weak. Please use a stronger password.';
+      } else if (e.code == 'invalid-email') {
+        errorMessage = 'The email address is invalid. Please check and try again.';
+      } else {
+        errorMessage = 'Registration failed: ${e.message ?? e.code}';
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Registration failed: ${e.toString()}')),
@@ -195,8 +210,10 @@ class _SignupScreenState extends State<SignupScreen> {
       controller: controller,
       keyboardType: keyboardType,
       validator: validator ?? _requiredField,
+      style: const TextStyle(color: Colors.black),
       decoration: InputDecoration(
         hintText: hintText,
+        hintStyle: const TextStyle(color: Colors.grey),
         prefixIcon: Icon(icon, color: Colors.grey),
         filled: true,
         fillColor: Colors.white,
@@ -213,6 +230,7 @@ class _SignupScreenState extends State<SignupScreen> {
       controller: _passwordController,
       obscureText: _obscurePassword,
       enableInteractiveSelection: false, // disables copy/paste/select
+      style: const TextStyle(color: Colors.black),
       validator: (value) {
         if (value == null || value.isEmpty) return 'Please enter a password';
         final passwordRegex = RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$');
@@ -222,6 +240,7 @@ class _SignupScreenState extends State<SignupScreen> {
       },
       decoration: InputDecoration(
         hintText: 'Enter your password',
+        hintStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
         suffixIcon: IconButton(
           icon: Icon(
@@ -251,6 +270,7 @@ class _SignupScreenState extends State<SignupScreen> {
     return TextFormField(
       controller: _confirmPasswordController,
       obscureText: _obscurePassword,
+      style: const TextStyle(color: Colors.black),
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
           return 'Please confirm your password';
@@ -262,6 +282,7 @@ class _SignupScreenState extends State<SignupScreen> {
       },
       decoration: InputDecoration(
         hintText: 'Confirm your password',
+        hintStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.lock_outline, color: Colors.grey),
         filled: true,
         fillColor: Colors.white,
