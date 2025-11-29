@@ -2,10 +2,17 @@ import 'dart:async';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
+
+// --- IMPORTS FOR NAVIGATION ---
 import 'package:news_app/views/alerts_notifications_screen.dart';
 import 'package:news_app/views/profile_screen.dart';
 import 'package:news_app/views/settings_screen.dart';
-import 'package:syncfusion_flutter_gauges/gauges.dart';
+
+import 'devices.dart';
+// IMPORT YOUR DEVICES SCREEN FILE HERE.
+// Example: import 'path/to/devices_screen.dart';
+// For now, I will assume the class is available in the project.
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -16,6 +23,9 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   final DatabaseReference _database = FirebaseDatabase.instance.ref('sensorData');
+
+  // --- NAVIGATION STATE ---
+  int _selectedIndex = 0;
 
   double _voltage = 0.0;
   double _current = 0.0;
@@ -33,10 +43,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _databaseSubscription = _database.onValue.listen((event) {
       if (event.snapshot.value != null) {
         final data = Map<String, dynamic>.from(event.snapshot.value as Map);
-        setState(() {
-          _voltage = double.tryParse(data['voltage'].toString()) ?? 0.0;
-          _current = double.tryParse(data['current'].toString()) ?? 0.0;
-        });
+        // Check if mounted to prevent setstate errors if user navigates away
+        if (mounted) {
+          setState(() {
+            _voltage = double.tryParse(data['voltage'].toString()) ?? 0.0;
+            _current = double.tryParse(data['current'].toString()) ?? 0.0;
+          });
+        }
       }
     });
 
@@ -46,10 +59,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       duration: const Duration(seconds: 4),
     )..repeat(reverse: true);
 
-    // Tween between your initial color and black
+    // Tween between your initial color and off-white/cream
     _gradientColor = ColorTween(
-      begin: const Color(0xff23ABC3), // your top color
-      end: const Color(0xffFFFDD0),   // black bottom color
+      begin: const Color(0xff23ABC3),
+      end: const Color(0xffFFFDD0),
     ).animate(_controller);
   }
 
@@ -60,8 +73,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.dispose();
   }
 
+  // --- HANDLE TAB TAPS ---
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    // We create the list of pages here so we can pass context if needed
+    final List<Widget> _pages = [
+      _buildDashboardView(),          // Index 0: Your original Home Dashboard
+      const DevicesScreen(),          // Index 1: The Device Manager (Make sure class name matches)
+      const Center(child: Text("Usage Screen")), // Index 2: Placeholder
+      const Center(child: Text("Bill Screen")),  // Index 3: Placeholder
+      const SettingsScreen() // Index 4: Placeholder
+    ];
+
     return AnimatedBuilder(
       animation: _gradientColor,
       builder: (context, child) {
@@ -80,10 +109,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           child: child,
         );
       },
-      // The scaffold is child here, so it rebuilds without re-creating animation
       child: Scaffold(
-        backgroundColor: Colors.transparent, // Make scaffold background transparent
-        appBar: AppBar(
+        backgroundColor: Colors.transparent,
+
+        // Only show the Home AppBar if we are on the Home Tab (Index 0)
+        // DevicesScreen has its own AppBar, so we hide this one to avoid double headers.
+        appBar: _selectedIndex == 0 ? AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
           leadingWidth: 70,
@@ -114,75 +145,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               icon: const Icon(Icons.settings_outlined, color: Colors.black),
             ),
           ],
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildEnergyCard(),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Real-time Monitoring', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
-                  Switch(value: true, onChanged: (value) {})
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(child: _buildVoltageGauge()),
-                  const SizedBox(width: 10),
-                  Expanded(child: _buildCurrentGauge()),
-                ],
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Connected Devices', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
-                  Text('View All', style: GoogleFonts.poppins(fontSize: 14, color: Colors.black))
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  const Icon(Icons.arrow_forward_ios, size: 28, color: Colors.blue),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Hair Dryer', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500)),
-                    ],
-                  ),
-                  const Spacer(),
-                  Text('On', style: GoogleFonts.poppins(fontSize: 12, color: Colors.black))
-                ],
-              ),
-              const SizedBox(height: 20),
-              Text('Usage Summary', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
-              const SizedBox(height: 10),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _bar('Mon', 50),
-                  _bar('Tue', 80),
-                  _bar('Wed', 40),
-                  _bar('Thu', 70),
-                  _bar('Fri', 60),
-                  _bar('Sat', 90),
-                  _bar('Sun', 100),
-                ],
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
-        ),
+        ) : null, // Return null to hide AppBar on other tabs
+
+        // Switch the body based on selected index
+        body: _pages[_selectedIndex],
+
         bottomNavigationBar: BottomNavigationBar(
           selectedItemColor: Colors.blue,
           unselectedItemColor: Colors.grey,
-          currentIndex: 0,
+          currentIndex: _selectedIndex, // Connect state
+          onTap: _onItemTapped,         // Connect handler
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
@@ -192,6 +164,78 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
           ],
         ),
+      ),
+    );
+  }
+
+  // --- ORIGINAL HOME CONTENT MOVED HERE ---
+  Widget _buildDashboardView() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildEnergyCard(),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Real-time Monitoring', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
+              Switch(value: true, onChanged: (value) {})
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(child: _buildVoltageGauge()),
+              const SizedBox(width: 10),
+              Expanded(child: _buildCurrentGauge()),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Connected Devices', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
+              // Optional: You can make "View All" switch to the devices tab
+              GestureDetector(
+                onTap: () => setState(() => _selectedIndex = 1),
+                child: Text('View All', style: GoogleFonts.poppins(fontSize: 14, color: Colors.black)),
+              )
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              const Icon(Icons.arrow_forward_ios, size: 28, color: Colors.blue),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Hair Dryer', style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500)),
+                ],
+              ),
+              const Spacer(),
+              Text('On', style: GoogleFonts.poppins(fontSize: 12, color: Colors.black))
+            ],
+          ),
+          const SizedBox(height: 20),
+          Text('Usage Summary', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _bar('Mon', 50),
+              _bar('Tue', 80),
+              _bar('Wed', 40),
+              _bar('Thu', 70),
+              _bar('Fri', 60),
+              _bar('Sat', 90),
+              _bar('Sun', 100),
+            ],
+          ),
+          const SizedBox(height: 16),
+        ],
       ),
     );
   }

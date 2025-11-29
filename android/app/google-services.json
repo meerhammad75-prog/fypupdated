@@ -1,13 +1,33 @@
 {
   "project_info": {
-    "project_number": "1060890962647",
-    "project_id": "backend-project-f01af",
-    "storage_bucket": "backend-project-f01af.firebasestorage.app"
+    "project_number": "444731147200",
+    "firebase_url": "https://esp32energymonitor-934bb-default-rtdb.firebaseio.com",
+    "project_id": "esp32energymonitor-934bb",
+    "storage_bucket": "esp32energymonitor-934bb.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1060890962647:android:b3096b2008ec991061de92",
+        "mobilesdk_app_id": "1:444731147200:android:234072703c92811e783e25",
+        "android_client_info": {
+          "package_name": "com.example.automation"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBJkfzAibPKNLLo5q5IONl98Z7fF56gNjQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:444731147200:android:955412e20dcfa1f5783e25",
         "android_client_info": {
           "package_name": "com.example.news_app"
         }
@@ -15,7 +35,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyArkp3Fv3YarYIrch5CWlhjEsrNmw3HYjk"
+          "current_key": "AIzaSyBJkfzAibPKNLLo5q5IONl98Z7fF56gNjQ"
         }
       ],
       "services": {
