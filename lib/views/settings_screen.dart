@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 // ADDED AUTH SERVICES IMPORT
 import 'package:news_app/services/auth.dart';
+import 'package:news_app/theme/theme_manager.dart';
 
 import 'support_screens.dart';
 import 'about_screen.dart';
@@ -49,7 +50,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadLocalSettings() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
-      _isDarkMode = prefs.getBool('darkMode') ?? false;
+      _isDarkMode = themeManager.themeMode == ThemeMode.dark;
       _selectedTimezone = prefs.getString('timezone') ?? "PKT (UTC+5)";
     });
   }
@@ -113,10 +114,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF121212) : Colors.white;
+    final gradientStart = isDark ? const Color(0xFF1E1E1E) : Colors.black;
+    final gradientEnd = isDark ? const Color(0xFF2C2C2C) : _darkCyan;
+    final gradientEnd2 = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.black, _darkCyan, Colors.white],
+          colors: [gradientStart, gradientEnd, gradientEnd2],
           begin: Alignment.topCenter, end: Alignment.bottomCenter, stops: const [0.0, 0.35, 0.85],
         ),
       ),
@@ -152,8 +159,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   value: _isDarkMode,
                   onChanged: (v) async {
                     setState(() => _isDarkMode = v);
-                    final prefs = await SharedPreferences.getInstance();
-                    prefs.setBool('darkMode', v);
+                    // Use ThemeManager to toggle theme - this will update all screens
+                    await themeManager.toggleTheme(v);
                   },
                 ),
                 _buildDivider(),
@@ -256,6 +263,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   // ===========================================================================
 
   Widget _buildHeader(String title) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12, left: 10),
       child: Align(
@@ -263,7 +271,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Text(
           title.toUpperCase(),
           style: TextStyle(
-            color: Colors.white.withOpacity(0.9),
+            color: isDark ? Colors.white.withOpacity(0.9) : Colors.white.withOpacity(0.9),
             fontSize: 12,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.5,
@@ -274,12 +282,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildPremiumCard(List<Widget> children) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 25, offset: const Offset(0, 10)),
+          BoxShadow(
+            color: isDark ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.1),
+            blurRadius: 25,
+            offset: const Offset(0, 10),
+          ),
         ],
       ),
       child: Column(children: children),
@@ -293,6 +306,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required String subtitle,
     required VoidCallback onTap,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -308,16 +322,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black)),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                    ),
                     const SizedBox(height: 3),
-                    Text(subtitle, style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500)),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? Colors.grey.shade400 : Colors.grey,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                   ],
                 ),
               ),
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: Colors.grey.shade100, shape: BoxShape.circle),
-                child: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade600, size: 20),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey.shade800 : Colors.grey.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                  size: 20,
+                ),
               ),
             ],
           ),
@@ -334,6 +369,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     required bool value,
     required Function(bool) onChanged,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
@@ -344,9 +380,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black)),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                ),
                 const SizedBox(height: 3),
-                Text(subtitle, style: const TextStyle(fontSize: 13, color: Colors.grey, fontWeight: FontWeight.w500)),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: isDark ? Colors.grey.shade400 : Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
           ),
@@ -355,7 +405,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             activeColor: Colors.white,
             activeTrackColor: _cyanColor,
             inactiveThumbColor: Colors.white,
-            inactiveTrackColor: Colors.grey.shade300,
+            inactiveTrackColor: isDark ? Colors.grey.shade700 : Colors.grey.shade300,
             onChanged: onChanged,
           )
         ],
@@ -376,9 +426,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildDivider() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(left: 86),
-      child: Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
+      child: Divider(
+        height: 1,
+        thickness: 1,
+        color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+      ),
     );
   }
 

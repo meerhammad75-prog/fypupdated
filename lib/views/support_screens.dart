@@ -48,11 +48,22 @@ class SupportScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = isDark
+        ? [
+      const Color(0xFF1E1E1E),
+      const Color(0xFF2C2C2C),
+      const Color(0xFF121212),
+    ]
+        : [Colors.black, const Color(0xff23ABC3), Colors.white];
+
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.black, Color(0xff23ABC3), Colors.white],
-          begin: Alignment.topCenter, end: Alignment.bottomCenter, stops: [0.0, 0.4, 0.9],
+          colors: gradientColors,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: const [0.0, 0.4, 0.9],
         ),
       ),
       child: Scaffold(
@@ -78,9 +89,9 @@ class SupportScreen extends StatelessWidget {
             // FAQ List
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
                 ),
                 child: ClipRRect(
                   borderRadius: const BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
@@ -92,10 +103,22 @@ class SupportScreen extends StatelessWidget {
                       return Container(
                         margin: const EdgeInsets.only(bottom: 15),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? const Color(0xFF2C2C2C) : Colors.white,
                           borderRadius: BorderRadius.circular(15),
-                          boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.1), blurRadius: 5, offset: const Offset(0, 3))],
-                          border: Border.all(color: Colors.grey.shade100),
+                          boxShadow: [
+                            BoxShadow(
+                              color: isDark
+                                  ? Colors.black.withOpacity(0.3)
+                                  : Colors.grey.withOpacity(0.1),
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            )
+                          ],
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.grey.shade800
+                                : Colors.grey.shade100,
+                          ),
                         ),
                         child: Theme(
                           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -103,7 +126,11 @@ class SupportScreen extends StatelessWidget {
                             tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                             title: Text(
                               faqs[index]["q"]!,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.black87),
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
                             ),
                             leading: const Icon(Icons.help_outline, color: Color(0xff23ABC3)),
                             children: [
@@ -111,7 +138,12 @@ class SupportScreen extends StatelessWidget {
                                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                                 child: Text(
                                   faqs[index]["a"]!,
-                                  style: TextStyle(color: Colors.grey[600], height: 1.5),
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? Colors.grey.shade400
+                                        : Colors.grey[600],
+                                    height: 1.5,
+                                  ),
                                 ),
                               )
                             ],

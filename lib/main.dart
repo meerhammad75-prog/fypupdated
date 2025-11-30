@@ -18,6 +18,8 @@ import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  // Load saved theme preference
+  await themeManager.loadTheme();
 
   runApp(const MyApp());
 }
@@ -27,32 +29,39 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      themeMode: themeManager.themeMode,
+    // Use ListenableBuilder to rebuild when theme changes
+    return ListenableBuilder(
+      listenable: themeManager,
+      builder: (context, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          themeMode: themeManager.themeMode,
 
-      // 2. Define Light Theme
-      theme: ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-        primarySwatch: Colors.indigo,
-        useMaterial3: true,
-      ),
+          // 2. Define Light Theme
+          theme: ThemeData(
+            brightness: Brightness.light,
+            scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+            primarySwatch: Colors.indigo,
+            useMaterial3: true,
+          ),
 
-      // 3. Define Dark Theme
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF121212),
-        primaryColor: const Color(0xff23ABC3),
-        useMaterial3: true,
-        // Customize dark cards to be dark grey, not black
-        cardTheme: CardTheme(color: Colors.grey[900]),
-        appBarTheme: const AppBarTheme(backgroundColor: Colors.transparent),
-      ),      home: SplashScreen(),
-      routes: {
-        AlertsNotificationsScreen.routeName: (_) => const AlertsNotificationsScreen(),
-        SettingsScreen.routeName: (_) => const SettingsScreen(),
-        ProfileScreen.routeName: (_) => const ProfileScreen(),
+          // 3. Define Dark Theme
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF121212),
+            primaryColor: const Color(0xff23ABC3),
+            useMaterial3: true,
+            // Customize dark cards to be dark grey, not black
+            cardTheme: CardTheme(color: Colors.grey[900]),
+            appBarTheme: const AppBarTheme(backgroundColor: Colors.transparent),
+          ),
+          home: const SplashScreen(),
+          routes: {
+            AlertsNotificationsScreen.routeName: (_) => const AlertsNotificationsScreen(),
+            SettingsScreen.routeName: (_) => const SettingsScreen(),
+            ProfileScreen.routeName: (_) => const ProfileScreen(),
+          },
+        );
       },
     );
   }

@@ -65,12 +65,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = isDark
+        ? [
+      const Color(0xFF1E1E1E),
+      const Color(0xFF2C2C2C),
+      const Color(0xFF121212),
+    ]
+        : [_blackColor, _cyanColor, Colors.white];
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [_blackColor, _cyanColor, Colors.white],
+          colors: gradientColors,
           stops: const [0.0, 0.4, 0.9],
         ),
       ),
@@ -232,13 +241,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildCard(List<Widget> children) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: isDark
+                ? Colors.black.withOpacity(0.3)
+                : Colors.black.withOpacity(0.05),
             blurRadius: 20,
             offset: const Offset(0, 5),
           ),
@@ -259,17 +271,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label,
-                    style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500)),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.grey.shade400
+                        : Colors.grey,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 const SizedBox(height: 4),
-                Text(value,
-                    style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
-                        fontWeight: FontWeight.w600)),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ],
             ),
           ),
@@ -290,11 +312,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               _buildIconBox(icon),
               const SizedBox(width: 16),
-              Text(title,
-                  style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black87,
-                      fontWeight: FontWeight.w600)),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black87,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
               const Spacer(),
               const Icon(Icons.chevron_right_rounded,
                   color: Colors.grey, size: 22),

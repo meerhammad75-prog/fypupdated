@@ -41,12 +41,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = isDark
+        ? [
+      const Color(0xFF121212),
+      const Color(0xFF1E1E1E),
+      const Color(0xFF2C2C2C),
+    ]
+        : [
+      const Color(0xff000000),
+      const Color(0xff23ABC3),
+      const Color(0xffFFFFFF),
+    ];
+
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xff000000), Color(0xff23ABC3), Color(0xffFFFFFF)],
+          colors: gradientColors,
         ),
       ),
       child: Padding(
@@ -143,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 .loginUser(
                                 email: emailController.text.trim(),
                                 password: pwdController.text.trim());
-                            
+
                             setState(() => _isLoading = false);
 
                             if (user != null) {

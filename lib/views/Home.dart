@@ -83,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     // We create the list of pages here so we can pass context if needed
     final List<Widget> _pages = [
       _buildDashboardView(),          // Index 0: Your original Home Dashboard
@@ -90,6 +91,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       const EnergyStatisticsScreen(), // Index 2: Placeholder
       const Center(child: Text("Bill Screen")),  // Index 3: Placeholder
       const SettingsScreen() // Index 4: Placeholder
+    ];
+
+    final gradientColors = isDark
+        ? [
+      const Color(0xFF1E1E1E),
+      const Color(0xFF2C2C2C),
+      const Color(0xFF121212),
+    ]
+        : [
+      _gradientColor.value ?? const Color(0xff23ABC3),
+      const Color(0xff23ABC3),
+      const Color(0xffFFFFFF),
     ];
 
     return AnimatedBuilder(
@@ -100,11 +113,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                _gradientColor.value ?? const Color(0xff23ABC3),
-                const Color(0xff23ABC3),
-                const Color(0xffFFFFFF),
-              ],
+              colors: isDark
+                  ? [
+                const Color(0xFF1E1E1E),
+                const Color(0xFF2C2C2C),
+                const Color(0xFF121212),
+              ]
+                  : gradientColors,
             ),
           ),
           child: child,
@@ -133,17 +148,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             style: GoogleFonts.poppins(
               fontSize: 20,
               fontWeight: FontWeight.w600,
-              color: Colors.black,
+              color: isDark ? Colors.white : Colors.black,
             ),
           ),
           actions: [
             IconButton(
               onPressed: () => Navigator.pushNamed(context, AlertsNotificationsScreen.routeName),
-              icon: const Icon(Icons.notifications_none, color: Colors.black),
+              icon: Icon(Icons.notifications_none, color: isDark ? Colors.white : Colors.black),
             ),
             IconButton(
               onPressed: () => Navigator.pushNamed(context, SettingsScreen.routeName),
-              icon: const Icon(Icons.settings_outlined, color: Colors.black),
+              icon: Icon(Icons.settings_outlined, color: isDark ? Colors.white : Colors.black),
             ),
           ],
         ) : null, // Return null to hide AppBar on other tabs
@@ -152,8 +167,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         body: _pages[_selectedIndex],
 
         bottomNavigationBar: BottomNavigationBar(
-          selectedItemColor: Colors.blue,
-          unselectedItemColor: Colors.grey,
+          backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          selectedItemColor: isDark ? const Color(0xff23ABC3) : Colors.blue,
+          unselectedItemColor: isDark ? Colors.grey.shade600 : Colors.grey,
           currentIndex: _selectedIndex, // Connect state
           onTap: _onItemTapped,         // Connect handler
           type: BottomNavigationBarType.fixed,
@@ -171,6 +187,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   // --- ORIGINAL HOME CONTENT MOVED HERE ---
   Widget _buildDashboardView() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -181,7 +198,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Real-time Monitoring', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
+              Text(
+                'Real-time Monitoring',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
               Switch(value: true, onChanged: (value) {})
             ],
           ),
@@ -196,11 +220,24 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Connected Devices', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
+              Text(
+                'Connected Devices',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
               // Optional: You can make "View All" switch to the devices tab
               GestureDetector(
                 onTap: () => setState(() => _selectedIndex = 1),
-                child: Text('View All', style: GoogleFonts.poppins(fontSize: 14, color: Colors.black)),
+                child: Text(
+                  'View All',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                ),
               )
             ],
           ),
@@ -220,7 +257,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             ],
           ),
           const SizedBox(height: 20),
-          Text('Usage Summary', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w500)),
+          Text(
+            'Usage Summary',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
           const SizedBox(height: 10),
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -383,7 +427,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
         ),
         const SizedBox(height: 4),
-        Text(label, style: GoogleFonts.poppins(fontSize: 12))
+        Text(
+          label,
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black87,
+          ),
+        )
       ],
     );
   }

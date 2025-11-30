@@ -50,11 +50,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final gradientColors = isDark
+        ? [
+      const Color(0xFF1E1E1E),
+      const Color(0xFF2C2C2C),
+      const Color(0xFF121212),
+    ]
+        : [Colors.black, const Color(0xff23ABC3), Colors.white];
+
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [Colors.black, Color(0xff23ABC3), Colors.white],
-          begin: Alignment.topCenter, end: Alignment.bottomCenter, stops: [0.0, 0.4, 0.9],
+          colors: gradientColors,
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: const [0.0, 0.4, 0.9],
         ),
       ),
       child: Scaffold(
@@ -75,9 +86,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               const SizedBox(height: 30),
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 5))],
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withOpacity(0.3)
+                          : Colors.black.withOpacity(0.1),
+                      blurRadius: 20,
+                      offset: const Offset(0, 5),
+                    )
+                  ],
                 ),
                 child: Column(
                   children: [
@@ -97,16 +116,33 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Widget _buildSwitch(IconData icon, String title, String subtitle, bool value, Function(bool) onChanged) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: SwitchListTile(
         secondary: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: const Color(0xff23ABC3).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-          child: Icon(icon, color: const Color(0xff23ABC3)),
+          decoration: BoxDecoration(
+            color: const Color(0xff23ABC3).withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child:  Icon(icon, color: Color(0xff23ABC3)),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87, fontSize: 16)), // Force Black
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: Colors.grey)), // Force Grey
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 16,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? Colors.grey.shade400 : Colors.grey,
+          ),
+        ),
         value: value,
         activeColor: const Color(0xff23ABC3),
         onChanged: onChanged,
